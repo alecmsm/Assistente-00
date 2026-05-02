@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foco — Assistente Pessoal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #17171f;
+    --card: #1e1e2a;
+    --border: #2a2a38;
+    --accent: #7c6af7;
+    --accent-soft: #a394fa;
+    --gold: #e8c97a;
+    --green: #5bc98a;
+    --red: #f07070;
+    --text: #e8e8f0;
+    --muted: #7878a0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text); min-height: 100vh; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  input, textarea, select { font-family: inherit; }
+  input::placeholder, textarea::placeholder { color: var(--muted); }
+
+  /* Layout */
+  .app { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 200px; background: var(--surface); border-right: 1px solid var(--border);
+    padding: 28px 16px; display: flex; flex-direction: column; gap: 4px;
+    flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .logo { padding: 0 8px 24px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+  .logo-title { font-size: 18px; font-weight: 900; color: var(--text); font-family: 'DM Serif Display', serif; }
+  .logo-title span { color: var(--accent); }
+  .logo-sub { font-size: 11px; color: var(--muted); margin-top: 2px; letter-spacing: 1px; }
+  .nav-btn {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+    border: none; border-left: 2px solid transparent; background: transparent;
+    color: var(--muted); font-family: inherit; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all .15s; text-align: left; width: 100%;
+  }
+  .nav-btn.active {
+    background: rgba(124,106,247,0.13); color: var(--accent-soft);
+    font-weight: 700; border-left-color: var(--accent);
+  }
+  .nav-icon { font-size: 16px; }
+  .main { flex: 1; padding: 32px 36px; overflow-y: auto; max-width: 700px; }
+  .section-label { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+
+  /* Cards */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .card-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 14px; }
+
+  /* Stats grid */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; }
+  .stat-value { font-size: 24px; font-weight: 800; }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* Tag */
+  .tag { border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+
+  /* Checkbox */
+  .check-row { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+  .check-box {
+    width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--border);
+    background: transparent; display: flex; align-items: center; justify-content: center;
+    transition: all .2s; flex-shrink: 0; cursor: pointer;
+  }
+  .check-box.checked { border-color: var(--accent); background: var(--accent); }
+  .check-mark { color: #fff; font-size: 12px; font-weight: 900; }
+  .check-label { font-size: 15px; color: var(--text); transition: all .2s; }
+  .check-label.done { color: var(--muted); text-decoration: line-through; }
+
+  /* Inputs */
+  .input-field {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; color: var(--text); font-size: 14px; outline: none; width: 100%;
+  }
+  .input-field:focus { border-color: var(--accent); }
+  .btn-primary {
+    background: var(--accent); border: none; border-radius: 8px; padding: 10px 20px;
+    color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+    transition: opacity .15s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-outline {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 16px; color: var(--muted); font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .btn-outline.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* Pomodoro */
+  .timer-ring { transform: rotate(-90deg); }
+  .timer-display { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .timer-time { font-size: 44px; font-weight: 900; color: var(--text); font-variant-numeric: tabular-nums; }
+  .timer-mode-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .session-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--border); transition: background .3s; }
+  .session-dot.filled { background: var(--accent); }
+
+  /* Chat */
+  .chat-messages { display: flex; flex-direction: column; gap: 14px; overflow-y: auto; min-height: 300px; max-height: 420px; padding-bottom: 16px; }
+  .msg { display: flex; }
+  .msg.user { justify-content: flex-end; }
+  .msg-avatar {
+    width: 28px; height: 28px; border-radius: 8px; background: rgba(124,106,247,0.2);
+    border: 1px solid rgba(124,106,247,0.27); display: flex; align-items: center; justify-content: center;
+    font-size: 14px; margin-right: 10px; flex-shrink: 0; margin-top: 2px;
+  }
+  .msg-bubble {
+    max-width: 78%; border-radius: 14px 14px 14px 4px; padding: 10px 14px;
+    font-size: 14px; color: var(--text); line-height: 1.65; white-space: pre-wrap;
+    background: var(--card); border: 1px solid var(--border);
+  }
+  .msg.user .msg-bubble { border-radius: 14px 14px 4px 14px; background: var(--accent); border-color: var(--accent); }
+  .typing-dots { display: flex; gap: 5px; align-items: center; padding: 4px 0; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: bounce 1.2s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+  .chat-input-row { display: flex; gap: 10px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .quick-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .quick-btn {
+    background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+    padding: 6px 14px; color: var(--muted); font-size: 12px; cursor: pointer; font-family: inherit;
+  }
+  .quick-btn:hover { border-color: var(--accent); color: var(--accent-soft); }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    .sidebar { width: 56px; padding: 20px 8px; }
+    .logo-title, .logo-sub, .nav-label { display: none; }
+    .nav-btn { padding: 10px; justify-content: center; }
+    .main { padding: 20px 16px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* Section hidden */
+  .section { display: none; }
+  .section.active { display: flex; flex-direction: column; gap: 24px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-title"><span>◆</span> Foco</div>
+      <div class="logo-sub">ASSISTENTE PESSOAL</div>
+    </div>
+    <button class="nav-btn active" onclick="showSection('hoje')">
+      <span class="nav-icon">◈</span><span class="nav-label">Hoje</span>
+    </button>
+    <button class="nav-btn" onclick="showSection('tarefas')">
+      <span class="nav-icon">◻</span><span class="nav-label">Tarefas</span>
+    </button>
+    <button class="nav-btn" onclick="showSection('foco')">
+      <span class="nav-icon">◎</span><span class="nav-label">Foco</span>
+    </button>
+    <button class="nav-btn" onclick="showSection('assistente')">
+      <span class="nav-icon">◆</span><span class="nav-label">Assistente IA</span>
+    </button>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="section-label" id="section-label">◈ Hoje</div>
+
+    <!-- HOJE -->
+    <div class="section active" id="sec-hoje">
+      <div>
+        <div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px" id="hoje-date"></div>
+        <h2 style="font-size:28px;font-weight:800;font-family:'DM Serif Display',serif" id="hoje-greeting"></h2>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" style="color:var(--accent)" id="stat-habitos">0/5</div><div class="stat-label">Hábitos feitos</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:var(--gold)" id="stat-foco">0 min</div><div class="stat-label">Foco acumulado</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:var(--green)" id="stat-tarefas">–</div><div class="stat-label">Tarefas abertas</div></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Rotina do dia</div>
+        <div style="display:flex;flex-direction:column;gap:10px" id="habits-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Nota rápida do dia</div>
+        <textarea id="daily-note" placeholder="O que está na sua cabeça hoje?" style="width:100%;background:transparent;border:none;outline:none;resize:none;color:var(--text);font-size:15px;font-family:inherit;line-height:1.7;min-height:80px"></textarea>
+      </div>
+    </div>
+
+    <!-- TAREFAS -->
+    <div class="section" id="sec-tarefas">
+      <div class="card">
+        <div class="card-label">Nova tarefa</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <input id="task-input" class="input-field" style="flex:1;min-width:180px" placeholder="Descreva a tarefa..." onkeydown="if(event.key==='Enter')addTask()">
+          <select id="task-priority" class="input-field" style="width:auto">
+            <option value="alta">Alta</option>
+            <option value="media" selected>Média</option>
+            <option value="baixa">Baixa</option>
+          </select>
+          <button class="btn-primary" onclick="addTask()">+ Adicionar</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px" id="task-filters">
+        <button class="btn-outline active" onclick="setFilter('todas',this)">todas</button>
+        <button class="btn-outline" onclick="setFilter('pendentes',this)">pendentes</button>
+        <button class="btn-outline" onclick="setFilter('feitas',this)">feitas</button>
+      </div>
+      <div id="tasks-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <!-- FOCO -->
+    <div class="section" id="sec-foco" style="align-items:center">
+      <div style="display:flex;gap:8px" id="mode-btns">
+        <button class="btn-outline active" onclick="switchMode('foco',this)">Foco</button>
+        <button class="btn-outline" onclick="switchMode('curta',this)">Pausa Curta</button>
+        <button class="btn-outline" onclick="switchMode('longa',this)">Pausa Longa</button>
+      </div>
+      <div style="position:relative;width:220px;height:220px">
+        <svg width="220" height="220" class="timer-ring">
+          <circle cx="110" cy="110" r="90" fill="none" stroke="var(--border)" stroke-width="8"/>
+          <circle id="timer-ring" cx="110" cy="110" r="90" fill="none" stroke="var(--accent)" stroke-width="8"
+            stroke-dasharray="565.5" stroke-dashoffset="0" stroke-linecap="round" style="transition:stroke-dashoffset .5s,stroke .3s"/>
+        </svg>
+        <div class="timer-display">
+          <div class="timer-time" id="timer-display">25:00</div>
+          <div class="timer-mode-label" id="timer-mode-label">Foco</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px">
+        <button id="timer-btn" class="btn-primary" style="border-radius:12px;padding:12px 36px;font-size:16px;font-weight:800" onclick="toggleTimer()">▶ Iniciar</button>
+        <button class="btn-outline" style="border-radius:12px;padding:12px 20px;font-size:14px" onclick="resetTimer()">↺</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="session-dot" id="dot0"></div>
+        <div class="session-dot" id="dot1"></div>
+        <div class="session-dot" id="dot2"></div>
+        <div class="session-dot" id="dot3"></div>
+        <span style="font-size:13px;color:var(--muted);margin-left:8px" id="sessions-label">0 sessões hoje</span>
+      </div>
+      <div class="card" style="width:100%;max-width:400px">
+        <div class="card-label">Dicas de foco</div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div style="font-size:13px;color:var(--muted);padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--accent);margin-right:8px">◈</span>Coloque o celular no modo não perturbe</div>
+          <div style="font-size:13px;color:var(--muted);padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--accent);margin-right:8px">◈</span>Feche abas desnecessárias do navegador</div>
+          <div style="font-size:13px;color:var(--muted);padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--accent);margin-right:8px">◈</span>Defina uma tarefa principal por sessão</div>
+          <div style="font-size:13px;color:var(--muted);padding:8px 0"><span style="color:var(--accent);margin-right:8px">◈</span>Levante e se movimente nas pausas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASSISTENTE -->
+    <div class="section" id="sec-assistente" style="height:100%">
+      <div class="quick-btns" id="quick-btns">
+        <button class="quick-btn" onclick="setQuick(this)">O que tenho pra fazer hoje?</button>
+        <button class="quick-btn" onclick="setQuick(this)">Quais hábitos ainda não fiz?</button>
+        <button class="quick-btn" onclick="setQuick(this)">Como está meu dia até agora?</button>
+        <button class="quick-btn" onclick="setQuick(this)">Qual tarefa devo fazer agora?</button>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg">
+          <div class="msg-avatar">◆</div>
+          <div class="msg-bubble">Olá! Sou seu assistente de produtividade. Posso ajudar com planejamento, priorização de tarefas, estratégias de foco e organização do trabalho. Como posso ajudar hoje?</div>
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input id="chat-input" class="input-field" placeholder="Pergunte algo sobre produtividade..." onkeydown="if(event.key==='Enter')sendMessage()">
+        <button class="btn-primary" style="border-radius:10px;padding:11px 20px;font-size:15px" onclick="sendMessage()">→</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const state = {
+  habits: [
+    { id:1, label:"Revisar e-mails", done:false },
+    { id:2, label:"Planejar tarefas do dia", done:false },
+    { id:3, label:"Bloco de foco 25min", done:false },
+    { id:4, label:"Pausa ativa", done:false },
+    { id:5, label:"Revisão do dia", done:false },
+  ],
+  tasks: [
+    { id:1, text:"Preparar relatório semanal", priority:"alta", done:false },
+    { id:2, text:"Responder e-mails pendentes", priority:"media", done:false },
+    { id:3, text:"Revisar documentação do projeto", priority:"baixa", done:true },
+  ],
+  taskFilter: "todas",
+  timer: { mode:"foco", time:1500, running:false, interval:null, sessions:0 },
+  focusMinutes: 0,
+  chatMessages: [],
+  chatLoading: false,
+};
+
+const MODES = {
+  foco:  { label:"Foco",        duration:1500, color:"#7c6af7" },
+  curta: { label:"Pausa Curta", duration:300,  color:"#5bc98a" },
+  longa: { label:"Pausa Longa", duration:900,  color:"#e8c97a" },
+};
+
+const PRIORITIES = {
+  alta:  { label:"Alta",  color:"#f07070" },
+  media: { label:"Média", color:"#e8c97a" },
+  baixa: { label:"Baixa", color:"#5bc98a" },
+};
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+const SECTION_META = {
+  hoje:       { icon:"◈", label:"Hoje" },
+  tarefas:    { icon:"◻", label:"Tarefas" },
+  foco:       { icon:"◎", label:"Foco" },
+  assistente: { icon:"◆", label:"Assistente IA" },
+};
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  const meta = SECTION_META[id];
+  document.getElementById('section-label').textContent = meta.icon + ' ' + meta.label;
+}
+
+// ─── HOJE ─────────────────────────────────────────────────────────────────────
+function initHoje() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' });
+  document.getElementById('hoje-date').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+  const h = now.getHours();
+  const greeting = h < 12 ? 'Bom dia 👋' : h < 18 ? 'Boa tarde 👋' : 'Boa noite 👋';
+  document.getElementById('hoje-greeting').textContent = greeting;
+  renderHabits();
+}
+
+function renderHabits() {
+  const list = document.getElementById('habits-list');
+  list.innerHTML = '';
+  state.habits.forEach(hab => {
+    const row = document.createElement('div');
+    row.className = 'check-row';
+    row.innerHTML = `
+      <div class="check-box ${hab.done ? 'checked' : ''}" onclick="toggleHabit(${hab.id})">
+        ${hab.done ? '<span class="check-mark">✓</span>' : ''}
+      </div>
+      <span class="check-label ${hab.done ? 'done' : ''}">${hab.label}</span>
+    `;
+    list.appendChild(row);
+  });
+  updateStats();
+}
+
+function toggleHabit(id) {
+  const h = state.habits.find(x => x.id === id);
+  h.done = !h.done;
+  renderHabits();
+}
+
+function updateStats() {
+  const done = state.habits.filter(h => h.done).length;
+  document.getElementById('stat-habitos').textContent = done + '/' + state.habits.length;
+  document.getElementById('stat-foco').textContent = state.focusMinutes + ' min';
+  const open = state.tasks.filter(t => !t.done).length;
+  document.getElementById('stat-tarefas').textContent = open;
+}
+
+// ─── TAREFAS ──────────────────────────────────────────────────────────────────
+function addTask() {
+  const input = document.getElementById('task-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const priority = document.getElementById('task-priority').value;
+  state.tasks.push({ id: Date.now(), text, priority, done: false });
+  input.value = '';
+  renderTasks();
+  updateStats();
+}
+
+function setFilter(f, btn) {
+  state.taskFilter = f;
+  document.querySelectorAll('#task-filters .btn-outline').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTasks();
+}
+
+function renderTasks() {
+  const list = document.getElementById('tasks-list');
+  let filtered = state.tasks;
+  if (state.taskFilter === 'pendentes') filtered = filtered.filter(t => !t.done);
+  if (state.taskFilter === 'feitas') filtered = filtered.filter(t => t.done);
+  list.innerHTML = '';
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:14px;text-align:center;padding:40px">Nenhuma tarefa aqui ✦</div>';
+    return;
+  }
+  filtered.forEach(t => {
+    const p = PRIORITIES[t.priority];
+    const div = document.createElement('div');
+    div.style.cssText = `background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;opacity:${t.done?'0.6':'1'};transition:opacity .2s`;
+    div.innerHTML = `
+      <div class="check-box ${t.done?'checked':''}" onclick="toggleTask(${t.id})" style="width:22px;height:22px;border-radius:6px">
+        ${t.done?'<span class="check-mark">✓</span>':''}
+      </div>
+      <div style="flex:1">
+        <div style="font-size:15px;color:${t.done?'var(--muted)':'var(--text)'};text-decoration:${t.done?'line-through':'none'}">${t.text}</div>
+        <div style="margin-top:4px">
+          <span class="tag" style="background:${p.color}22;color:${p.color};border:1px solid ${p.color}44">${p.label}</span>
+        </div>
+      </div>
+      <button onclick="removeTask(${t.id})" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px">✕</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function toggleTask(id) {
+  const t = state.tasks.find(x => x.id === id);
+  t.done = !t.done;
+  renderTasks();
+  updateStats();
+}
+
+function removeTask(id) {
+  state.tasks = state.tasks.filter(x => x.id !== id);
+  renderTasks();
+  updateStats();
+}
+
+// ─── FOCO ─────────────────────────────────────────────────────────────────────
+function switchMode(m, btn) {
+  clearInterval(state.timer.interval);
+  state.timer.mode = m;
+  state.timer.time = MODES[m].duration;
+  state.timer.running = false;
+  document.querySelectorAll('#mode-btns .btn-outline').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('timer-btn').textContent = '▶ Iniciar';
+  renderTimer();
+}
+
+function toggleTimer() {
+  if (state.timer.running) {
+    clearInterval(state.timer.interval);
+    state.timer.running = false;
+    document.getElementById('timer-btn').textContent = '▶ Iniciar';
+  } else {
+    state.timer.running = true;
+    document.getElementById('timer-btn').textContent = '⏸ Pausar';
+    state.timer.interval = setInterval(() => {
+      state.timer.time--;
+      if (state.timer.time <= 0) {
+        clearInterval(state.timer.interval);
+        state.timer.running = false;
+        document.getElementById('timer-btn').textContent = '▶ Iniciar';
+        if (state.timer.mode === 'foco') {
+          state.timer.sessions++;
+          state.focusMinutes += 25;
+          renderSessions();
+          updateStats();
+        }
+        state.timer.time = 0;
+      }
+      renderTimer();
+    }, 1000);
+  }
+}
+
+function resetTimer() {
+  clearInterval(state.timer.interval);
+  state.timer.running = false;
+  state.timer.time = MODES[state.timer.mode].duration;
+  document.getElementById('timer-btn').textContent = '▶ Iniciar';
+  renderTimer();
+}
+
+function renderTimer() {
+  const t = state.timer.time;
+  const m = Math.floor(t/60), s = t%60;
+  document.getElementById('timer-display').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  document.getElementById('timer-mode-label').textContent = MODES[state.timer.mode].label;
+  const pct = t / MODES[state.timer.mode].duration;
+  const circ = 2 * Math.PI * 90;
+  const ring = document.getElementById('timer-ring');
+  ring.style.strokeDashoffset = circ * (1 - pct);
+  ring.style.stroke = MODES[state.timer.mode].color;
+}
+
+function renderSessions() {
+  const s = state.timer.sessions;
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.classList.toggle('filled', i < s % 4);
+  }
+  document.getElementById('sessions-label').textContent = s + ' sessões hoje';
+}
+
+// ─── ASSISTENTE IA ─────────────────────────────────────────────────────────────
+function setQuick(btn) {
+  document.getElementById('chat-input').value = btn.textContent;
+}
+
+function appendMsg(role, text) {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + (role === 'user' ? 'user' : '');
+  if (role === 'assistant') {
+    div.innerHTML = `<div class="msg-avatar">◆</div><div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  } else {
+    div.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  }
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function showTyping() {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.id = 'typing-indicator';
+  div.innerHTML = `<div class="msg-avatar">◆</div><div class="msg-bubble"><div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function hideTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function buildSystemPrompt() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const timeStr = now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+
+  const habitsDone = state.habits.filter(h => h.done).map(h => h.label);
+  const habitsPending = state.habits.filter(h => !h.done).map(h => h.label);
+
+  const tasksPending = state.tasks.filter(t => !t.done).map(t => `"${t.text}" (prioridade: ${t.priority})`);
+  const tasksDone = state.tasks.filter(t => t.done).map(t => `"${t.text}"`);
+
+  const dailyNote = document.getElementById('daily-note').value.trim();
+
+  return `Você é um assistente pessoal de produtividade em português do Brasil. Você tem acesso ao estado atual do app do usuário e deve responder de forma natural, como um assistente que conhece a rotina dele.
+
+DATA E HORA ATUAL: ${dateStr}, ${timeStr}
+
+HÁBITOS DO DIA:
+- Concluídos (${habitsDone.length}): ${habitsDone.length ? habitsDone.join(', ') : 'nenhum ainda'}
+- Pendentes (${habitsPending.length}): ${habitsPending.length ? habitsPending.join(', ') : 'todos feitos! 🎉'}
+
+TAREFAS:
+- Abertas (${tasksPending.length}): ${tasksPending.length ? tasksPending.join(' | ') : 'nenhuma tarefa aberta'}
+- Concluídas (${tasksDone.length}): ${tasksDone.length ? tasksDone.join(', ') : 'nenhuma ainda'}
+
+SESSÕES DE FOCO HOJE: ${state.timer.sessions} sessões (${state.focusMinutes} minutos acumulados)
+TIMER ATUAL: ${MODES[state.timer.mode].label} — ${state.timer.running ? 'em andamento' : 'pausado'}
+
+NOTA DO DIA: ${dailyNote || '(nenhuma nota escrita)'}
+
+Com base nessas informações, responda as perguntas do usuário de forma natural, prática e motivadora. Quando ele perguntar sobre tarefas, hábitos ou foco, use os dados reais acima. Sugira próximos passos quando fizer sentido. Seja direto e conciso.`;
+}
+
+async function sendMessage() {
+  if (state.chatLoading) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  document.getElementById('quick-btns').style.display = 'none';
+
+  state.chatMessages.push({ role:'user', content: text });
+  appendMsg('user', text);
+  showTyping();
+  state.chatLoading = true;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: buildSystemPrompt(),
+        messages: state.chatMessages
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.map(c => c.text || '').join('') || 'Desculpe, não consegui responder.';
+    state.chatMessages.push({ role:'assistant', content: reply });
+    hideTyping();
+    appendMsg('assistant', reply);
+  } catch(e) {
+    hideTyping();
+    appendMsg('assistant', 'Erro ao conectar. Verifique sua conexão e tente novamente.');
+  } finally {
+    state.chatLoading = false;
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+initHoje();
+renderTasks();
+renderTimer();
+</script>
+</body>
+</html>
