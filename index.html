@@ -161,6 +161,76 @@
   .day-btn { width:36px;height:36px;border-radius:50%;border:2px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s; }
   .day-btn.active { border-color:var(--accent);background:var(--accent);color:#fff; }
 
+
+  /* Custom datepicker */
+  .date-picker-wrap { position: relative; display: inline-block; }
+  .date-picker-btn {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; color: var(--text); font-size: 14px; font-family: inherit;
+    cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 8px;
+    transition: border-color .15s; min-width: 140px;
+  }
+  .date-picker-btn:hover { border-color: var(--accent); }
+  .date-picker-popup {
+    position: absolute; top: calc(100% + 8px); left: 0; z-index: 300;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); min-width: 280px;
+    display: none;
+  }
+  .date-picker-popup.open { display: block; }
+  .dp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .dp-month-label { font-size: 14px; font-weight: 700; color: var(--text); }
+  .dp-nav { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+  .dp-nav:hover { background: var(--card); color: var(--text); }
+  .dp-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 6px; }
+  .dp-weekday { text-align: center; font-size: 11px; font-weight: 700; color: var(--muted); padding: 4px 0; }
+  .dp-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .dp-day {
+    text-align: center; font-size: 13px; padding: 7px 0; border-radius: 8px;
+    cursor: pointer; color: var(--text); border: none; background: none; font-family: inherit;
+    transition: all .15s;
+  }
+  .dp-day:hover { background: var(--card); }
+  .dp-day.today { color: var(--accent); font-weight: 700; }
+  .dp-day.selected { background: var(--accent); color: #fff; font-weight: 700; }
+  .dp-day.empty { cursor: default; }
+  .dp-day.other-month { color: var(--border); }
+  .dp-clear { width: 100%; margin-top: 10px; padding: 7px; background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 12px; cursor: pointer; font-family: inherit; }
+  .dp-clear:hover { border-color: var(--red); color: var(--red); }
+
+
+  /* Search bar */
+  .search-wrap { position: relative; margin-bottom: 4px; }
+  .search-input { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px 10px 38px; color: var(--text); font-size: 14px; outline: none; width: 100%; transition: border-color .15s; }
+  .search-input:focus { border-color: var(--accent); }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 15px; pointer-events: none; }
+  .search-results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; z-index: 200; max-height: 260px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.3); display: none; }
+  .search-results.open { display: block; }
+  .search-result-item { padding: 10px 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); transition: background .1s; }
+  .search-result-item:last-child { border-bottom: none; }
+  .search-result-item:hover { background: var(--card); }
+  .search-empty { padding: 16px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  /* Smart input */
+  .smart-input-wrap { position: relative; }
+  .smart-hint { font-size: 11px; color: var(--accent); margin-top: 6px; min-height: 16px; }
+  .smart-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .smart-tag { background: rgba(124,106,247,0.15); color: var(--accent-soft); border: 1px solid rgba(124,106,247,0.3); border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
+
+  /* Progress bar */
+  .progress-bar-wrap { background: var(--border); border-radius: 99px; height: 6px; overflow: hidden; margin-top: 8px; }
+  .progress-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--accent-soft)); transition: width .4s; }
+
+  /* Drag & drop */
+  .task-item { transition: opacity .2s, transform .1s; }
+  .task-item.dragging { opacity: 0.4; }
+  .task-item.drag-over { border-color: var(--accent) !important; }
+
+  /* Notification toast */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; font-size: 14px; color: var(--text); z-index: 9999; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transform: translateY(100px); opacity: 0; transition: all .3s; max-width: 320px; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.urgent { border-color: var(--red); }
+
   /* Section hidden */
   .section { display: none; }
   .section.active { display: flex; flex-direction: column; gap: 24px; }
@@ -203,6 +273,8 @@
 </style>
 </head>
 <body>
+<div class="toast" id="toast"></div>
+
 <!-- LOGIN SCREEN -->
 <div class="login-screen" id="login-screen">
   <div class="login-card">
@@ -262,11 +334,20 @@
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-value" style="color:var(--accent)" id="stat-habitos">0/5</div><div class="stat-label">Hábitos feitos</div></div>
         <div class="stat-card"><div class="stat-value" style="color:var(--gold)" id="stat-foco">0 min</div><div class="stat-label">Foco acumulado</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:var(--green)" id="stat-tarefas">–</div><div class="stat-label">Tarefas abertas</div></div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--green)" id="stat-tarefas">–</div>
+          <div class="stat-label">Tarefas abertas</div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+        </div>
       </div>
       <div class="card">
-        <div class="card-label">Rotina do dia</div>
-        <div style="display:flex;flex-direction:column;gap:10px" id="habits-list"></div>
+        <div class="card-label">➕ Adicionar tarefa rápida</div>
+        <div class="smart-input-wrap">
+          <input id="smart-input" class="input-field" placeholder='Ex: "Reunião com cliente amanhã alta prioridade"' oninput="parseSmartInput(this.value)" onkeydown="if(event.key==='Enter')smartAddTask()">
+          <div class="smart-tags" id="smart-tags"></div>
+          <div class="smart-hint" id="smart-hint"></div>
+        </div>
+        <button class="btn-primary" style="margin-top:10px;width:100%" onclick="smartAddTask()">+ Adicionar</button>
       </div>
       <div class="card" id="hoje-tasks-hoje-card">
         <div class="card-label" style="display:flex;justify-content:space-between;align-items:center">
@@ -303,6 +384,11 @@
 
     <!-- TAREFAS -->
     <div class="section" id="sec-tarefas">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="search-input" placeholder="Buscar tarefas..." oninput="searchTasks(this.value)" onblur="setTimeout(()=>closeSearch(),200)">
+        <div class="search-results" id="search-results"></div>
+      </div>
       <div class="card">
         <div class="card-label">Nova tarefa</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -312,7 +398,25 @@
             <option value="media" selected>Média</option>
             <option value="baixa">Baixa</option>
           </select>
-          <input id="task-date" type="date" class="input-field" style="width:auto" title="Prazo (opcional)">
+          <div class="date-picker-wrap">
+          <button type="button" class="date-picker-btn" onclick="toggleDatePicker()" id="date-picker-btn">
+            <span>📅</span><span id="date-picker-label">Sem prazo</span>
+          </button>
+          <div class="date-picker-popup" id="date-picker-popup">
+            <div class="dp-header">
+              <button class="dp-nav" onclick="dpNav(-1)">‹</button>
+              <span class="dp-month-label" id="dp-month-label"></span>
+              <button class="dp-nav" onclick="dpNav(1)">›</button>
+            </div>
+            <div class="dp-weekdays">
+              <div class="dp-weekday">D</div><div class="dp-weekday">S</div><div class="dp-weekday">T</div>
+              <div class="dp-weekday">Q</div><div class="dp-weekday">Q</div><div class="dp-weekday">S</div>
+              <div class="dp-weekday">S</div>
+            </div>
+            <div class="dp-days" id="dp-days"></div>
+            <button class="dp-clear" onclick="dpClear()">Limpar data</button>
+          </div>
+        </div>
           <button class="btn-primary" onclick="addTask()">+ Adicionar</button>
         </div>
         <div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap">
@@ -425,13 +529,7 @@
 <script>
 // ─── STATE ────────────────────────────────────────────────────────────────────
 const state = {
-  habits: [
-    { id:1, label:"Revisar e-mails", done:false },
-    { id:2, label:"Planejar tarefas do dia", done:false },
-    { id:3, label:"Bloco de foco 25min", done:false },
-    { id:4, label:"Pausa ativa", done:false },
-    { id:5, label:"Revisão do dia", done:false },
-  ],
+  habits: [],
   tasks: [
     { id:1, text:"Preparar relatório semanal", priority:"alta", done:false },
     { id:2, text:"Responder e-mails pendentes", priority:"media", done:false },
@@ -465,11 +563,12 @@ const SECTION_META = {
   assistente: { icon:"◆", label:"Assistente IA" },
 };
 
-function showSection(id) {
+function showSection(id, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  const activeBtn = btn || (event && event.currentTarget);
+  if (activeBtn) activeBtn.classList.add('active');
   const meta = SECTION_META[id];
   document.getElementById('section-label').textContent = meta.icon + ' ' + meta.label;
 }
@@ -512,8 +611,13 @@ function updateStats() {
   const done = state.habits.filter(h => h.done).length;
   document.getElementById('stat-habitos').textContent = done + '/' + state.habits.length;
   document.getElementById('stat-foco').textContent = state.focusMinutes + ' min';
+  const total = state.tasks.length;
   const open = state.tasks.filter(t => !t.done).length;
+  const completed = total - open;
   document.getElementById('stat-tarefas').textContent = open;
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const bar = document.getElementById('progress-bar');
+  if (bar) bar.style.width = pct + '%';
 }
 
 function renderHojeTasks() {
@@ -631,6 +735,303 @@ function toggleTaskById(id) {
 }
 
 
+
+
+// ─── PERSISTENCE (localStorage) ───────────────────────────────────────────────
+const STORAGE_KEY = 'foco_app_data';
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      tasks: state.tasks,
+      recurringTasks: state.recurringTasks,
+      dailyNote: document.getElementById('daily-note')?.value || '',
+      focusMinutes: state.focusMinutes,
+      timerSessions: state.timer.sessions,
+      savedAt: Date.now()
+    }));
+  } catch(e) { console.error('Save error', e); }
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    // Reset done status daily
+    const today = new Date().toDateString();
+    const savedDay = new Date(data.savedAt).toDateString();
+    if (data.tasks) {
+      state.tasks = data.tasks.map(t => savedDay !== today ? { ...t, done: false } : t);
+    }
+    if (data.recurringTasks) state.recurringTasks = data.recurringTasks;
+    if (data.focusMinutes) state.focusMinutes = data.focusMinutes;
+    if (data.timerSessions) state.timer.sessions = data.timerSessions;
+    setTimeout(() => {
+      if (data.dailyNote && document.getElementById('daily-note')) {
+        document.getElementById('daily-note').value = data.dailyNote;
+      }
+    }, 100);
+  } catch(e) { console.error('Load error', e); }
+}
+
+// Auto-save every 30 seconds and on task changes
+setInterval(saveData, 30000);
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveData(); });
+
+// ─── TOAST NOTIFICATIONS ──────────────────────────────────────────────────────
+function showToast(msg, urgent = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (urgent ? ' urgent' : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = 'toast', 3500);
+}
+
+// ─── BROWSER NOTIFICATIONS ────────────────────────────────────────────────────
+function requestNotifications() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function sendNotification(title, body) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, { body, icon: '🎯' });
+  } else {
+    showToast('🔔 ' + title + ': ' + body, true);
+  }
+}
+
+function checkDeadlines() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+  state.tasks.filter(t => !t.done && t.dueDate).forEach(t => {
+    const due = new Date(t.dueDate + 'T00:00:00');
+    if (due.getTime() === today.getTime()) {
+      showToast('📌 Vence hoje: ' + t.text, true);
+    } else if (due.getTime() === tomorrow.getTime()) {
+      showToast('⚠️ Vence amanhã: ' + t.text);
+    }
+  });
+}
+setTimeout(checkDeadlines, 3000);
+setInterval(checkDeadlines, 60 * 60 * 1000);
+
+// ─── SMART INPUT PARSER ───────────────────────────────────────────────────────
+function parseSmartInput(text) {
+  const tags = document.getElementById('smart-tags');
+  const hint = document.getElementById('smart-hint');
+  if (!text.trim()) { tags.innerHTML = ''; hint.textContent = ''; return; }
+
+  const result = extractFromText(text);
+  let tagsHtml = '';
+  if (result.priority) tagsHtml += '<span class="smart-tag">🎯 ' + {alta:'Alta',media:'Média',baixa:'Baixa'}[result.priority] + '</span>';
+  if (result.date) tagsHtml += '<span class="smart-tag">📅 ' + new Date(result.date + 'T00:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) + '</span>';
+  tags.innerHTML = tagsHtml;
+  hint.textContent = tagsHtml ? 'Detectado automaticamente ✓' : 'Dica: "amanhã", "alta prioridade", "semana que vem"';
+}
+
+function extractFromText(text) {
+  const lower = text.toLowerCase();
+  const today = new Date(); today.setHours(0,0,0,0);
+  let priority = 'media', date = '';
+
+  if (/alta|urgente|importante|crítico/.test(lower)) priority = 'alta';
+  else if (/baixa|depois|quando puder/.test(lower)) priority = 'baixa';
+
+  if (/hoje/.test(lower)) {
+    date = today.toISOString().split('T')[0];
+  } else if (/amanhã|amanha/.test(lower)) {
+    const d = new Date(today); d.setDate(d.getDate() + 1);
+    date = d.toISOString().split('T')[0];
+  } else if (/semana que vem|próxima semana/.test(lower)) {
+    const d = new Date(today); d.setDate(d.getDate() + 7);
+    date = d.toISOString().split('T')[0];
+  } else if (/essa semana|esta semana/.test(lower)) {
+    const d = new Date(today); d.setDate(d.getDate() + 3);
+    date = d.toISOString().split('T')[0];
+  }
+
+  const cleanText = text
+    .replace(/hoje|amanhã|amanha|semana que vem|próxima semana|essa semana|esta semana/gi, '')
+    .replace(/alta prioridade|prioridade alta|urgente|importante|crítico/gi, '')
+    .replace(/baixa prioridade|prioridade baixa|depois|quando puder/gi, '')
+    .replace(/média prioridade|prioridade média/gi, '')
+    .trim().replace(/\s+/g, ' ');
+
+  return { priority, date, cleanText };
+}
+
+async function smartAddTask() {
+  const input = document.getElementById('smart-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const { priority, date, cleanText } = extractFromText(text);
+  const taskText = cleanText || text;
+  const task = { id: Date.now(), text: taskText, priority, done: false, dueDate: date };
+  state.tasks.push(task);
+  input.value = '';
+  document.getElementById('smart-tags').innerHTML = '';
+  document.getElementById('smart-hint').textContent = '';
+  renderTasks();
+  renderHojeTasks();
+  updateStats();
+  saveData();
+  showToast('✓ Tarefa adicionada!');
+  if (accessToken) autoSyncTask(task);
+}
+
+// ─── SEARCH ───────────────────────────────────────────────────────────────────
+function searchTasks(query) {
+  const results = document.getElementById('search-results');
+  if (!query.trim()) { results.classList.remove('open'); return; }
+  const q = query.toLowerCase();
+  const found = [
+    ...state.tasks.filter(t => t.text.toLowerCase().includes(q)),
+    ...state.recurringTasks.filter(t => t.text.toLowerCase().includes(q))
+  ].slice(0, 8);
+
+  if (found.length === 0) {
+    results.innerHTML = '<div class="search-empty">Nenhuma tarefa encontrada</div>';
+  } else {
+    const PRIORITIES = { alta:'🔴', media:'🟡', baixa:'🟢' };
+    results.innerHTML = found.map(t =>
+      '<div class="search-result-item" onclick="highlightTask(' + t.id + ')">' +
+        '<span>' + (PRIORITIES[t.priority] || '♻') + '</span>' +
+        '<span style="flex:1;font-size:14px">' + t.text + '</span>' +
+        (t.dueDate ? '<span style="font-size:11px;color:var(--muted)">' + new Date(t.dueDate+'T00:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) + '</span>' : '') +
+      '</div>'
+    ).join('');
+  }
+  results.classList.add('open');
+}
+
+function closeSearch() {
+  document.getElementById('search-results').classList.remove('open');
+}
+
+function highlightTask(id) {
+  closeSearch();
+  document.getElementById('search-input').value = '';
+  showSection('tarefas', document.querySelector('.nav-btn:nth-child(3)'));
+  setTimeout(() => {
+    const el = document.querySelector('[data-task-id="' + id + '"]');
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.borderColor = 'var(--accent)'; setTimeout(() => el.style.borderColor = '', 2000); }
+  }, 100);
+}
+
+// ─── DRAG & DROP ──────────────────────────────────────────────────────────────
+let dragSrcId = null;
+
+function initDrag(el, id) {
+  el.draggable = true;
+  el.dataset.taskId = id;
+  el.addEventListener('dragstart', () => { dragSrcId = id; el.classList.add('dragging'); });
+  el.addEventListener('dragend', () => el.classList.remove('dragging'));
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
+  el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+  el.addEventListener('drop', e => {
+    e.preventDefault(); el.classList.remove('drag-over');
+    if (dragSrcId === id) return;
+    const fromIdx = state.tasks.findIndex(t => t.id === dragSrcId);
+    const toIdx = state.tasks.findIndex(t => t.id === id);
+    if (fromIdx === -1 || toIdx === -1) return;
+    const [moved] = state.tasks.splice(fromIdx, 1);
+    state.tasks.splice(toIdx, 0, moved);
+    renderTasks(); saveData();
+  });
+}
+
+// ─── AUTO SYNC HELPER ─────────────────────────────────────────────────────────
+async function autoSyncTask(task) {
+  if (!accessToken) return;
+  try {
+    const listsRes = await fetch('https://tasks.googleapis.com/tasks/v1/users/@me/lists', { headers: { Authorization: 'Bearer ' + accessToken } });
+    const lists = await listsRes.json();
+    let listId = lists.items?.[0]?.id;
+    if (!listId) {
+      const nl = await (await fetch('https://tasks.googleapis.com/tasks/v1/users/@me/lists', { method:'POST', headers:{ Authorization:'Bearer '+accessToken,'Content-Type':'application/json' }, body:JSON.stringify({title:'Assistente Foco'}) })).json();
+      listId = nl.id;
+    }
+    const body = { title: task.text };
+    if (task.dueDate) body.due = new Date(task.dueDate + 'T12:00:00').toISOString();
+    await fetch('https://tasks.googleapis.com/tasks/v1/lists/' + listId + '/tasks', { method:'POST', headers:{ Authorization:'Bearer '+accessToken,'Content-Type':'application/json' }, body:JSON.stringify(body) });
+    const s = document.getElementById('sync-status');
+    s.textContent = '✓ Sincronizado!'; s.style.display = 'block';
+    setTimeout(() => s.style.display = 'none', 2500);
+  } catch(e) {}
+}
+
+// ─── DATEPICKER ───────────────────────────────────────────────────────────────
+let dpCurrentDate = new Date();
+let dpSelectedDate = null;
+
+function toggleDatePicker() {
+  const popup = document.getElementById('date-picker-popup');
+  popup.classList.toggle('open');
+  if (popup.classList.contains('open')) renderDpCalendar();
+}
+
+function closeDatePicker() {
+  document.getElementById('date-picker-popup').classList.remove('open');
+}
+
+function dpNav(dir) {
+  dpCurrentDate.setMonth(dpCurrentDate.getMonth() + dir);
+  renderDpCalendar();
+}
+
+function renderDpCalendar() {
+  const year = dpCurrentDate.getFullYear();
+  const month = dpCurrentDate.getMonth();
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('dp-month-label').textContent = months[month] + ' ' + year;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  let html = '';
+  for (let i = 0; i < firstDay; i++) html += '<button class="dp-day empty" disabled></button>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month, d);
+    const isToday = date.getTime() === today.getTime();
+    const isSelected = dpSelectedDate && date.toDateString() === dpSelectedDate.toDateString();
+    html += '<button class="dp-day' + (isToday ? ' today' : '') + (isSelected ? ' selected' : '') + '" onclick="dpSelectDay(' + year + ',' + month + ',' + d + ')">' + d + '</button>';
+  }
+  document.getElementById('dp-days').innerHTML = html;
+}
+
+function dpSelectDay(year, month, day) {
+  dpSelectedDate = new Date(year, month, day);
+  const label = dpSelectedDate.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  document.getElementById('date-picker-label').textContent = label;
+  document.getElementById('date-picker-btn').style.borderColor = 'var(--accent)';
+  closeDatePicker();
+}
+
+function dpClear() {
+  dpSelectedDate = null;
+  document.getElementById('date-picker-label').textContent = 'Sem prazo';
+  document.getElementById('date-picker-btn').style.borderColor = '';
+  closeDatePicker();
+}
+
+function getDpValue() {
+  if (!dpSelectedDate) return '';
+  const y = dpSelectedDate.getFullYear();
+  const m = String(dpSelectedDate.getMonth() + 1).padStart(2, '0');
+  const d = String(dpSelectedDate.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + d;
+}
+
+// Close datepicker when clicking outside
+document.addEventListener('click', (e) => {
+  const wrap = document.querySelector('.date-picker-wrap');
+  if (wrap && !wrap.contains(e.target)) closeDatePicker();
+});
+
 // ─── TAREFAS RECORRENTES ──────────────────────────────────────────────────────
 function toggleRecurOptions() {
   const checked = document.getElementById('task-recur-check').checked;
@@ -720,7 +1121,7 @@ async function addTask() {
   const text = input.value.trim();
   if (!text) return;
   const priority = document.getElementById('task-priority').value;
-  const dueDate = document.getElementById('task-date').value;
+  const dueDate = getDpValue();
   const isRecur = document.getElementById('task-recur-check').checked;
 
   if (isRecur) {
@@ -740,9 +1141,12 @@ async function addTask() {
   const task = { id: Date.now(), text, priority, done: false, dueDate };
   state.tasks.push(task);
   input.value = '';
-  document.getElementById('task-date').value = '';
+  dpClear();
   renderTasks();
+  renderHojeTasks();
   updateStats();
+  saveData();
+  showToast('✓ Tarefa adicionada!');
 
   // Auto-sync to Google Tasks if logged in
   if (accessToken) {
@@ -853,6 +1257,7 @@ function renderTasks() {
   filtered.forEach(t => {
     const p = PRIORITIES[t.priority];
     const div = document.createElement('div');
+    div.className = 'task-item';
     div.style.cssText = `background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;opacity:${t.done?'0.6':'1'};transition:opacity .2s`;
     div.innerHTML = `
       <div class="check-box ${t.done?'checked':''}" onclick="toggleTask(${t.id})" style="width:22px;height:22px;border-radius:6px">
@@ -867,6 +1272,7 @@ function renderTasks() {
       </div>
       <button onclick="removeTask(${t.id})" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px">✕</button>
     `;
+    initDrag(div, t.id);
     list.appendChild(div);
   });
 }
@@ -877,6 +1283,7 @@ function toggleTask(id) {
   renderTasks();
   renderHojeTasks();
   updateStats();
+  saveData();
 }
 
 function removeTask(id) {
@@ -884,6 +1291,7 @@ function removeTask(id) {
   renderTasks();
   renderHojeTasks();
   updateStats();
+  saveData();
 }
 
 // ─── FOCO ─────────────────────────────────────────────────────────────────────
@@ -1200,7 +1608,9 @@ window.addEventListener('load', () => {
 });
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
+loadData();
 initHoje();
+requestNotifications();
 renderTasks();
 renderHojeTasks();
 renderRecurringTasks();
