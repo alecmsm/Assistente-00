@@ -1065,11 +1065,50 @@ async function sendMessage() {
 // ─── GOOGLE AUTH & TASKS ──────────────────────────────────────────────────────
 const CLIENT_ID = '12220583127-1m8his4qepd6umd6qkjgnb5gcdbu8os2.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/tasks';
+const SESSION_KEY = 'foco_session';
+const SESSION_HOURS = 8; // sessão válida por 8 horas
 let tokenClient;
 let accessToken = null;
 
+function saveSession(token, userInfo) {
+  const expiry = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ token, userInfo, expiry }));
+}
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    if (Date.now() > session.expiry) { localStorage.removeItem(SESSION_KEY); return null; }
+    return session;
+  } catch(e) { return null; }
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+}
+
+function showApp(userInfo) {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('main-app').style.display = 'flex';
+  document.getElementById('user-info').style.display = 'flex';
+  document.getElementById('user-name').textContent = userInfo.given_name || userInfo.name;
+  document.getElementById('user-avatar').src = userInfo.picture || '';
+  document.getElementById('sync-btn').style.display = 'flex';
+}
+
 function initGoogle() {
   if (typeof google === 'undefined') return;
+
+  // Try to restore session first
+  const session = loadSession();
+  if (session) {
+    accessToken = session.token;
+    showApp(session.userInfo);
+    return;
+  }
+
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES + ' profile email',
@@ -1091,19 +1130,16 @@ async function fetchUserInfo() {
     const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
       headers: { Authorization: 'Bearer ' + accessToken }
     });
-    const data = await res.json();
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('main-app').style.display = 'flex';
-    document.getElementById('user-info').style.display = 'flex';
-    document.getElementById('user-name').textContent = data.given_name || data.name;
-    document.getElementById('user-avatar').src = data.picture || '';
-    document.getElementById('sync-btn').style.display = 'flex';
+    const userInfo = await res.json();
+    saveSession(accessToken, userInfo);
+    showApp(userInfo);
   } catch(e) { console.error(e); }
 }
 
 function logout() {
   if (accessToken) google.accounts.oauth2.revoke(accessToken);
   accessToken = null;
+  clearSession();
   document.getElementById('login-screen').classList.remove('hidden');
   document.getElementById('main-app').style.display = 'none';
   document.getElementById('user-info').style.display = 'none';
