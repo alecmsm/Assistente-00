@@ -6,6 +6,7 @@
 <title>Foco — Assistente Pessoal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root {
@@ -257,6 +258,24 @@
         <div class="card-label">Rotina do dia</div>
         <div style="display:flex;flex-direction:column;gap:10px" id="habits-list"></div>
       </div>
+      <div class="card" id="hoje-tasks-hoje-card">
+        <div class="card-label" style="display:flex;justify-content:space-between;align-items:center">
+          <span>📌 Tarefas de hoje</span>
+          <span id="hoje-tasks-hoje-count" style="font-size:11px;color:var(--accent)"></span>
+        </div>
+        <div id="hoje-tasks-hoje" style="display:flex;flex-direction:column;gap:8px">
+          <div style="color:var(--muted);font-size:13px">Nenhuma tarefa para hoje 🎉</div>
+        </div>
+      </div>
+      <div class="card" id="hoje-tasks-semana-card">
+        <div class="card-label" style="display:flex;justify-content:space-between;align-items:center">
+          <span>📅 Resto da semana</span>
+          <span id="hoje-tasks-semana-count" style="font-size:11px;color:var(--muted)"></span>
+        </div>
+        <div id="hoje-tasks-semana" style="display:flex;flex-direction:column;gap:6px">
+          <div style="color:var(--muted);font-size:13px">Nenhuma tarefa esta semana 🎉</div>
+        </div>
+      </div>
       <div class="card">
         <div class="card-label">Nota rápida do dia</div>
         <textarea id="daily-note" placeholder="O que está na sua cabeça hoje?" style="width:100%;background:transparent;border:none;outline:none;resize:none;color:var(--text);font-size:15px;font-family:inherit;line-height:1.7;min-height:80px"></textarea>
@@ -447,18 +466,137 @@ function updateStats() {
   document.getElementById('stat-tarefas').textContent = open;
 }
 
+function renderHojeTasks() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+  const endOfWeek = new Date(today); endOfWeek.setDate(today.getDate() + 7);
+
+  const pending = state.tasks.filter(t => !t.done);
+
+  // Tarefas de hoje: com data = hoje OU sem data (mostrar como hoje)
+  const todayTasks = pending.filter(t => {
+    if (!t.dueDate) return false;
+    const d = new Date(t.dueDate + 'T00:00:00');
+    return d <= today;
+  });
+
+  // Tarefas do resto da semana: amanhã até 7 dias
+  const weekTasks = pending.filter(t => {
+    if (!t.dueDate) return false;
+    const d = new Date(t.dueDate + 'T00:00:00');
+    return d >= tomorrow && d <= endOfWeek;
+  });
+
+  const PRIORITIES = { alta: { label:'Alta', color:'#f07070' }, media: { label:'Média', color:'#e8c97a' }, baixa: { label:'Baixa', color:'#5bc98a' } };
+
+  function taskRow(t, size) {
+    const p = PRIORITIES[t.priority];
+    const d = getDateInfo(t.dueDate);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:${size==='big'?'10px 0':'7px 0'};border-bottom:1px solid var(--border)" class="hoje-task-row">
+      <div onclick="toggleTaskById(${t.id})" style="width:${size==='big'?20:16}px;height:${size==='big'?20:16}px;border-radius:5px;border:2px solid var(--border);background:transparent;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s"></div>
+      <div style="flex:1">
+        <div style="font-size:${size==='big'?15:13}px;color:var(--text);font-weight:${size==='big'?600:400}">${t.text}</div>
+        <div style="margin-top:3px;display:flex;gap:5px">
+          <span style="background:${p.color}22;color:${p.color};border:1px solid ${p.color}44;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700">${p.label}</span>
+          <span class="date-tag ${d.cls}" style="font-size:10px">📅 ${d.label}</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // Render hoje
+  const hojeEl = document.getElementById('hoje-tasks-hoje');
+  const hojeCount = document.getElementById('hoje-tasks-hoje-count');
+  if (todayTasks.length === 0) {
+    hojeEl.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">Nenhuma tarefa para hoje 🎉</div>';
+    hojeCount.textContent = '';
+  } else {
+    hojeEl.innerHTML = todayTasks.map(t => taskRow(t, 'big')).join('');
+    hojeCount.textContent = todayTasks.length + ' tarefa(s)';
+  }
+
+  // Render semana - agrupar amanhã e depois
+  const semanaEl = document.getElementById('hoje-tasks-semana');
+  const semanaCount = document.getElementById('hoje-tasks-semana-count');
+  if (weekTasks.length === 0) {
+    semanaEl.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">Nenhuma tarefa esta semana 🎉</div>';
+    semanaCount.textContent = '';
+  } else {
+    const tomorrowTasks = weekTasks.filter(t => {
+      const d = new Date(t.dueDate + 'T00:00:00');
+      return d.getTime() === tomorrow.getTime();
+    });
+    const laterTasks = weekTasks.filter(t => {
+      const d = new Date(t.dueDate + 'T00:00:00');
+      return d.getTime() > tomorrow.getTime();
+    });
+
+    let html = '';
+    if (tomorrowTasks.length > 0) {
+      html += '<div style="font-size:11px;color:var(--gold);font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 0 2px">Amanhã</div>';
+      html += tomorrowTasks.map(t => taskRow(t, 'small')).join('');
+    }
+    if (laterTasks.length > 0) {
+      html += '<div style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 0 2px">Próximos dias</div>';
+      html += laterTasks.map(t => taskRow(t, 'small')).join('');
+    }
+    semanaEl.innerHTML = html;
+    semanaCount.textContent = weekTasks.length + ' tarefa(s)';
+  }
+}
+
+function toggleTaskById(id) {
+  const t = state.tasks.find(x => x.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  renderTasks();
+  renderHojeTasks();
+  updateStats();
+}
+
 // ─── TAREFAS ──────────────────────────────────────────────────────────────────
-function addTask() {
+async function addTask() {
   const input = document.getElementById('task-input');
   const text = input.value.trim();
   if (!text) return;
   const priority = document.getElementById('task-priority').value;
   const dueDate = document.getElementById('task-date').value;
-  state.tasks.push({ id: Date.now(), text, priority, done: false, dueDate });
+  const task = { id: Date.now(), text, priority, done: false, dueDate };
+  state.tasks.push(task);
   input.value = '';
   document.getElementById('task-date').value = '';
   renderTasks();
   updateStats();
+
+  // Auto-sync to Google Tasks if logged in
+  if (accessToken) {
+    try {
+      const listsRes = await fetch('https://tasks.googleapis.com/tasks/v1/users/@me/lists', {
+        headers: { Authorization: 'Bearer ' + accessToken }
+      });
+      const lists = await listsRes.json();
+      let listId = lists.items?.[0]?.id;
+      if (!listId) {
+        const newList = await fetch('https://tasks.googleapis.com/tasks/v1/users/@me/lists', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: 'Assistente Foco' })
+        });
+        listId = (await newList.json()).id;
+      }
+      const body = { title: text };
+      if (dueDate) body.due = new Date(dueDate + 'T12:00:00').toISOString();
+      await fetch('https://tasks.googleapis.com/tasks/v1/lists/' + listId + '/tasks', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const status = document.getElementById('sync-status');
+      status.textContent = '\u2713 Sincronizado com Google Tasks!';
+      status.style.display = 'block';
+      setTimeout(() => status.style.display = 'none', 3000);
+    } catch(e) { console.error('Sync error:', e); }
+  }
 }
 
 function getDateInfo(dueDate) {
@@ -514,12 +652,14 @@ function toggleTask(id) {
   const t = state.tasks.find(x => x.id === id);
   t.done = !t.done;
   renderTasks();
+  renderHojeTasks();
   updateStats();
 }
 
 function removeTask(id) {
   state.tasks = state.tasks.filter(x => x.id !== id);
   renderTasks();
+  renderHojeTasks();
   updateStats();
 }
 
@@ -700,7 +840,7 @@ async function sendMessage() {
 
 
 // ─── GOOGLE AUTH & TASKS ──────────────────────────────────────────────────────
-const CLIENT_ID = '12220583127-1m8his4qepd6umd6qkjgnb5gcdbu8os2.apps.googleusercontent.com'; // ← substitua pelo seu Client ID
+const CLIENT_ID = (typeof CONFIG !== 'undefined') ? CONFIG.CLIENT_ID : 'SEU_CLIENT_ID_AQUI';
 const SCOPES = 'https://www.googleapis.com/auth/tasks';
 let tokenClient;
 let accessToken = null;
@@ -803,6 +943,7 @@ window.addEventListener('load', () => {
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 initHoje();
 renderTasks();
+renderHojeTasks();
 renderTimer();
 </script>
 </body>
